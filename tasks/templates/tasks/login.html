@@ -123,15 +123,19 @@ text-decoration:underline;
 
 <div class="mb-3">
 <label>Username</label>
-<input type="text" name="username" placeholder="Enter username">
+<input type="text" name="username" placeholder="Enter username" required>
 </div>
 
 <div class="mb-3">
 <label>Password</label>
-<input type="password" name="password" placeholder="Enter password">
+<input type="password" name="password" placeholder="Enter password" required>
 </div>
 
 <button type="submit">Enter The Universe</button>
+
+{% if form.errors %}
+<p style="color:red; text-align:center;">Invalid username or password</p>
+{% endif %}
 
 </form>
 

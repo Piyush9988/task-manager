@@ -5,7 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth import login
 from datetime import date, datetime
+from django.contrib.auth import authenticate, login as auth_login
 import random
+
 
 
 @login_required
@@ -174,3 +176,22 @@ def update_task(request, id):
         return redirect("task_list")
 
     return render(request, 'update_task.html', {'task': task})
+
+
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            auth_login(request, user)
+            return redirect("task_list")
+        else:
+            return render(request, "tasks/login.html", {
+                "error": "Invalid username or password"
+            })
+
+    return render(request, "tasks/login.html")
