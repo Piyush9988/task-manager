@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+    <title>Cosmic Task Manager</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body{
+            margin:0;
+            min-height:100vh;
+            font-family:Arial;
+            background:radial-gradient(circle at bottom,#020024,#090979,#000000);
+            color:white;
+            overflow-x:hidden;
+        }
+
+        body::before{
+            content:"";
+            position:fixed;
+            top:-50%;
+            left:-50%;
+            width:200%;
+            height:200%;
+            background:conic-gradient(#ff00cc,#3333ff,#00ffff,#ff00cc);
+            animation:spin 60s linear infinite;
+            filter:blur(200px);
+            opacity:0.25;
+            z-index:-1;
+        }
+
+        @keyframes spin{
+            0%{transform:rotate(0deg)}
+            100%{transform:rotate(360deg)}
+        }
+
+        .stat-card{
+            background:rgba(20,20,40,0.9);
+            border-radius:15px;
+            padding:20px;
+            text-align:center;
+            box-shadow:0 0 20px #ff00cc;
+        }
+
+        .stat-number{
+            font-size:28px;
+            font-weight:bold;
+            color:#00ffff;
+        }
+
+        .card-cosmic{
+            background:rgba(20,20,40,0.92);
+            border-radius:20px;
+            box-shadow:0 0 40px #ff00cc;
+            padding:25px;
+        }
+
+        input,textarea,select{
+            background:#121245 !important;
+            color:white !important;
+            border:1px solid #00ffff !important;
+            border-radius:10px !important;
+            padding:12px !important;
+        }
+
+        input::placeholder,
+        textarea::placeholder{
+            color:#9dfcff !important;
+        }
+
+        .task-card{
+            background:#151540;
+            border-radius:15px;
+            padding:15px;
+            margin-bottom:15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container py-5">
+
+    <form action="/logout/" method="post" style="position:absolute; top:20px; right:20px;">
+        {% csrf_token %}
+        <button class="btn btn-danger">Logout</button>
+    </form>
+
+    <h2 class="text-center mb-4">Cosmic Task Dashboard</h2>
+
+    <h5 class="text-center text-info">
+        {{ greeting }}, {{ request.user.username }} 👋
+    </h5>
+
+    <div class="text-center mb-4">
+
+    <!-- BLUE ANIMATED QUOTE -->
+    <div id="motivationText" 
+        style="font-size:18px; color:#00ffff; text-shadow:0 0 10px #00ffff;">
+    </div>
+
+    <!-- WHITE STATIC QUOTE (UNCHANGED) -->
+    <div>
+        ✨ {{ quote|default:"QUOTE NOT COMING" }}
+    </div>
+
+</div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                Total Tasks
+                <div id="totalCount" class="stat-number">{{ total_tasks }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                Completed
+                <div id="completedCount" class="stat-number">{{ completed_tasks }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                Pending
+                <div id="pendingCount" class="stat-number">{{ pending_tasks }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-cosmic mb-4">
+        <h5>Productivity Progress</h5>
+
+        <div class="progress mb-4">
+            <div id="progressBar" class="progress-bar bg-info" style="width: {{ progress }}%">
+                {{ progress }}%
+            </div>
+        </div>
+
+        <h5>Task Analytics</h5>
+        <div style="width:300px; margin:auto;">
+            <canvas id="taskChart"></canvas>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-5">
+            <div class="card-cosmic">
+                <h4>Add New Task</h4>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <input name="title" class="form-control mb-2" placeholder="Enter task title">
+                    <textarea name="description" class="form-control mb-2" placeholder="Enter description"></textarea>
+
+                    <select name="priority" class="form-control mb-2">
+                        <option>High 🔴</option>
+                        <option selected>Medium 🟡</option>
+                        <option>Low 🟢</option>
+                    </select>
+
+                    <input type="date" name="due_date" class="form-control mb-3" required>
+
+                    <button class="btn btn-primary w-100">Add Task</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card-cosmic">
+
+                <h4>Your Tasks</h4>
+
+                {% if tasks|length == 0 %}
+                    <p class="text-center text-info">No tasks yet. Add your first task</p>
+                {% endif %}
+
+                {% for task in tasks %}
+
+                <div class="task-card d-flex justify-content-between {% if task.completed %}completed{% endif %}">
+
+                    <div>
+                        <strong>{{ task.title }}</strong>
+
+                        {% if "Low" in task.priority %}
+                            <span class="badge bg-success ms-2">● Low</span>
+                        {% elif "Medium" in task.priority %}
+                            <span class="badge bg-warning text-dark ms-2">● Medium</span>
+                        {% elif "High" in task.priority %}
+                            <span class="badge bg-danger ms-2">● High</span>
+                        {% endif %}
+
+                        <br>
+                        <small>{{ task.description }}</small>
+                        <br>
+
+                        {% if task.due_date and task.due_date < today %}
+                            <span class="text-danger">Overdue 🔴</span>
+                        {% else %}
+                            <small>Due: {{ task.due_date }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        {% if task.completed %}
+                            <span class="badge bg-success">Completed</span>
+                        {% elif task.due_date and task.due_date < today %}
+                            <span class="badge bg-danger">Overdue 🔴</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending 🟡</span>
+                            <button onclick="completeTask({{ task.id }}, this)" class="btn btn-success btn-sm ms-2">Complete</button>
+                        {% endif %}
+
+                        <a href="{% url 'update_task' task.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="/delete/{{ task.id }}/" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function completeTask(taskId, button) {
+    fetch("/complete/" + taskId + "/")
+    .then(function(res) {
+        return res.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+
+            var taskItem = button.closest(".task-card");
+            taskItem.classList.add("completed");
+
+            button.parentElement.innerHTML =
+                '<span class="badge bg-success">Completed</span>' +
+                '<a href="/update/' + taskId + '/" class="btn btn-warning btn-sm">Edit</a>' +
+                '<a href="/delete/' + taskId + '/" class="btn btn-danger btn-sm">Delete</a>';
+
+            var completed = document.querySelectorAll(".task-card.completed").length;
+            var total = document.querySelectorAll(".task-card").length;
+
+            document.getElementById("completedCount").innerText = completed;
+            document.getElementById("pendingCount").innerText = total - completed;
+            document.getElementById("totalCount").innerText = total;
+
+            var percent = total ? Math.round((completed / total) * 100) : 0;
+
+            var bar = document.getElementById("progressBar");
+            bar.style.width = percent + "%";
+            bar.innerText = percent + "%";
+
+            // UPDATE CHART LIVE
+            if (window.taskChart) {
+                window.taskChart.data.datasets[0].data = [
+                completed,
+                total - completed
+            ];
+        window.taskChart.update();
+    }
+
+            
+        }
+    });
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    var canvas = document.getElementById("taskChart");
+    if (!canvas) return;
+
+    var ctx = canvas.getContext("2d");
+
+    Chart.register(ChartDataLabels);
+
+    window.taskChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["Completed", "Pending"],
+            datasets: [{
+                data: [{{ completed_tasks }}, {{ pending_tasks }}],
+                backgroundColor: ["#00ffff", "#ff4dc4"],
+                borderColor: "#0b0b2a",
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: "70%",
+            plugins: {
+                legend: {
+                    labels: {
+                        color: "white"
+                    }
+                },
+                datalabels: {
+                    color: "white",
+                    formatter: function(value, context) {
+                        var total = context.chart._metasets[0].total;
+                        return ((value / total) * 100).toFixed(0) + "%";
+                    }
+                }
+            }
+        }
+    });
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const quotes = [
+        "📚 Focus like a warrior, not like a worrier",
+        "🔥 Discipline today = Success tomorrow",
+        "🧠 Study now so your future self can thank you",
+        "🚀 Small daily improvements = Massive results",
+        "⏳ Don't waste time, invest it in learning",
+        "💪 Consistency beats talent every single time",
+        "🎯 Stay focused, your goal is closer than you think",
+        "🌙 Late nights build bright futures",
+        "🏆 Winners study while others sleep",
+        "📖 Push yourself, no one else will do it for you",
+        "⚡ Focus on progress, not perfection",
+        "🔥 Your dreams demand discipline",
+        "🚫 No distractions, only goals",
+        "🧠 Train your mind to stay sharp",
+        "💯 One chapter today, success tomorrow"
+    ];
+
+    let i = 0;
+    let currentText = "";
+    let quoteIndex = Math.floor(Math.random() * quotes.length);
+
+    function typeEffect() {
+        if (i < quotes[quoteIndex].length) {
+            currentText += quotes[quoteIndex].charAt(i);
+            document.getElementById("motivationText").innerHTML = "✨ " + currentText + " ✨";
+            i++;
+            setTimeout(typeEffect, 30);
+        }
+    }
+
+    function changeQuote() {
+        i = 0;
+        currentText = "";
+        quoteIndex = Math.floor(Math.random() * quotes.length);
+        typeEffect();
+    }
+
+    // First load
+    changeQuote();
+
+    // Change every 1 hour
+    setInterval(changeQuote, 3600000);
+
+});
+</script>
+</body>
+</html>

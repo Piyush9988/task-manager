@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cosmic Task Manager</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body{
+margin:0;
+min-height:100vh;
+font-family:Arial;
+background:radial-gradient(circle at bottom,#020024,#090979,#000000);
+color:white;
+overflow-x:hidden;
+}
+
+.card-cosmic{
+background:rgba(20,20,40,0.92);
+border-radius:20px;
+box-shadow:0 0 40px #ff00cc;
+padding:25px;
+}
+
+input,textarea,select{
+background:#121245 !important;
+color:white !important;
+border:1px solid #00ffff !important;
+border-radius:10px !important;
+padding:12px !important;
+}
+
+.btn-glow{
+background:linear-gradient(45deg,#ff00cc,#3333ff);
+border:none;
+color:white;
+font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container py-5">
+{% block content %}
+{% endblock %}
+</div>
+
+</body>
+</html>
