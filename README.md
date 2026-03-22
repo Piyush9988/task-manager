@@ -1,4 +1,4 @@
-# 🚀 Task Manager Web App
+# Task Manager Web App
 
 A full-stack Django application for managing daily tasks with authentication, analytics, and modern UI.
 
