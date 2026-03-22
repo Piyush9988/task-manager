@@ -119,8 +119,12 @@ text-decoration:underline;
 <h1>🌌 Login</h1>
 
 <form method="POST">
-{% csrf_token %}
+    {% csrf_token %}
 
+{% if form.errors %}
+    <p style="color:red; text-align:center;">Invalid username or password</p>
+    {% endif %}
+    
 <div class="mb-3">
 <label>Username</label>
 <input type="text" name="username" placeholder="Username" class="form-control mb-2" required>

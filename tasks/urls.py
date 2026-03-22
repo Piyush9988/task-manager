@@ -17,7 +17,7 @@ urlpatterns = [
 
     #register
     path("register/", views.register, name="register"),
-    
-    
 
+    #Login
+    path("login/", views.user_login, name="user_login"),
 ]
