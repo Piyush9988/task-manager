@@ -9,12 +9,15 @@ from django.contrib.auth import authenticate, login as auth_login
 import random
 from django.contrib.auth.models import User
 
+def create_default_user():
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@gmail.com', 'admin123')
 
 @login_required
 def task_list(request):
 
     create_default_user()
-    
+
     # ⏰ Get current hour
     current_hour = datetime.now().hour
 
