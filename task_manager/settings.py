@@ -17,14 +17,11 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-*^&op4*m7+yjun&_7-bi8+v&*!*0w@=i3h57%ac7_&t&j3#mss'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -78,8 +75,12 @@ WSGI_APPLICATION = 'task_manager.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'task_manager_db',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres123',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
