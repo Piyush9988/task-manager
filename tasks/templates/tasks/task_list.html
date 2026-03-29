@@ -210,10 +210,13 @@
                     <div>
                         {% if task.completed %}
                             <span class="badge bg-success">Completed</span>
-                        {% elif task.due_date and task.due_date < today %}
+                        {% else %}
+                    
+                        {% if task.due_date and task.due_date < today %}
                             <span class="badge bg-danger">Overdue 🔴</span>
                         {% else %}
-                            <span class="badge bg-warning text-dark">Pending 🟡</span>
+                             <span class="badge bg-warning text-dark">Pending 🟡</span>
+                        {% endif %}
                             <button onclick="completeTask({{ task.id }}, this)" class="btn btn-success btn-sm ms-2">Complete</button>
                         {% endif %}
 

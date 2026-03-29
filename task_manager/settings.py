@@ -22,9 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*^&op4*m7+yjun&_7-bi8+v&*!*0w@=i3h57%ac7_&t&j3#mss'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
 
-ALLOWED_HOSTS = ['task-manager-2y3j.onrender.com']
+# DEBUG = True --- Used for Local Host
+DEBUG = False  # USed for Production(Render)
+
+ALLOWED_HOSTS = ['task-manager-2y3j.onrender.com']  # Used for Production(Render)
+
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'task-manager-2y3j.onrender.com'] 
+# --- Need to use when we use Locak Host
 
 
 # Application definition
@@ -77,8 +82,13 @@ WSGI_APPLICATION = 'task_manager.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.parse(
-        os.environ.get("DATABASE_URL")
-    )
+        os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=False
+    ) if os.environ.get("DATABASE_URL") else {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 

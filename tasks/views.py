@@ -48,7 +48,7 @@ def task_list(request):
         ]
     }
 
-    # 🎯 Select category
+    # Select category
     if current_hour < 12:
         selected_quotes = quotes["morning"]
     elif current_hour < 18:
@@ -56,7 +56,7 @@ def task_list(request):
     else:
         selected_quotes = quotes["evening"]
 
-    # 📅 Quote of the Day
+    # Quote of the Day
     today_str = str(date.today())
     random.seed(today_str)
     quote = random.choice(selected_quotes)
@@ -77,7 +77,7 @@ def task_list(request):
         pending_tasks = tasks.filter(completed=False).count()
         progress = int((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 0
 
-        # ❗ Error case
+        # Error case
         if not due_date:
             return render(request, "tasks/task_list.html", {
                 "tasks": tasks,
@@ -92,7 +92,7 @@ def task_list(request):
                 "greeting": greeting,
             })
 
-        # ✅ Create task
+        # Create task
         if title:
             Task.objects.create(
                 user=request.user,
